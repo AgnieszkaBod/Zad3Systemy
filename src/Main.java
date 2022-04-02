@@ -27,6 +27,7 @@ public class Main extends JFrame {
         setTitle("Zad3Systemy");
     }
 
+    public static final Main window = new Main();
     public static final String filePath = "src/katalog.txt";
 
     public static String[] headers = new String[15];
@@ -118,7 +119,7 @@ public class Main extends JFrame {
         Element laptops = document.createElement("laptops");
         laptops.setAttribute("moddate", String.valueOf(new Date()));
 
-        int j = 0;
+        int j;
         for (int i = 0; i < 24; i++) {
             j = 0;
             Element laptop = document.createElement("laptop");
@@ -126,7 +127,9 @@ public class Main extends JFrame {
 
             //PRODUCENT
             Element manufacturer = document.createElement("manufacturer");
+
             manufacturer.setTextContent((String) data[i][j]);
+
             j++;
 
             //EKRAN
@@ -188,12 +191,12 @@ public class Main extends JFrame {
             memory.setTextContent((String) data[i][j]);
             j++;
 
-            //SYSTEM OPERACYJNY
+
             Element os = document.createElement("os");
             os.setTextContent((String) data[i][j]);
             j++;
 
-            //NAPED
+
             Element disc_reader = document.createElement("disc_reader");
             disc_reader.setTextContent((String) data[i][j]);
 
@@ -234,20 +237,24 @@ public class Main extends JFrame {
 
     }
 
-    static void importFromXml() throws IOException, SAXException, ParserConfigurationException {
+    static void importFromXml() throws SAXException, ParserConfigurationException {
         File file = new File("laptops.xml");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse(file);
+        Document document = null;
+        try {
+            document = documentBuilder.parse(file);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(window
+                    , "Nie znaleziono pliku xml");
+        }
         document.getDocumentElement().normalize();
         System.out.println("Root element: " + document.getDocumentElement().getNodeName());
         NodeList nodeList = document.getElementsByTagName("laptop");
 
-        int j = 0;
+        int j;
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
-            System.out.println("\nLaptop id: " + node.getAttributes().getNamedItem("id").getNodeValue());
-
             j = 0;
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
@@ -287,7 +294,6 @@ public class Main extends JFrame {
 
     public static void main(String[] args) throws IOException {
 
-        Main window = new Main();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getHeaders();
 
@@ -314,8 +320,7 @@ public class Main extends JFrame {
                 if (aValue.toString().trim().isEmpty()) {
                     JOptionPane.showMessageDialog(window
                             , "Pole nie może być puste!");
-                } else if ((column == 4 || column == 10) && aValue.toString().trim().length() != 3) {
-                    JOptionPane.showMessageDialog(window
+                } else if ((column == 4 || column == 10) && aValue.toString().trim().length() != 3) {                    JOptionPane.showMessageDialog(window
                             , "Tekst musi miec 3 znaki!");
                 } else if (column == 1 && !aValue.toString().endsWith("\"")) {
                     JOptionPane.showMessageDialog(window
@@ -357,7 +362,8 @@ public class Main extends JFrame {
     private static void importXml(ActionEvent e) {
         try {
             importFromXml();
-        } catch (IOException | SAXException | ParserConfigurationException ex) {
+            window.repaint();
+        } catch (SAXException | ParserConfigurationException ex) {
             ex.printStackTrace();
         }
     }
